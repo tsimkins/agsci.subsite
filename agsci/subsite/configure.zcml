@@ -1,0 +1,90 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="agsci.subsite">
+
+    <five:registerPackage package="." initialize=".initialize" />
+
+    <!-- include our sub-packages that contain their own configure.zcml files -->
+    <include package=".content" />
+    <include package=".browser" />
+    <include package=".portlet" />
+    
+    <!-- Register an event handler for when a Subsite is created -->
+    <subscriber for="agsci.subsite.content.interfaces.ISubsite
+        Products.Archetypes.interfaces.IObjectInitializedEvent"
+        handler="agsci.subsite.events.onSubsiteCreation" 
+        />
+
+    <!-- Register an event handler for when a CountySite is created -->
+    <subscriber for="agsci.subsite.content.interfaces.ICountySite
+        Products.Archetypes.interfaces.IObjectInitializedEvent"
+        handler="agsci.subsite.events.onCountySiteCreation" 
+        />
+
+    <!-- Register an event handler for when a Section is created -->
+    <subscriber for="agsci.subsite.content.interfaces.ISection
+        Products.Archetypes.interfaces.IObjectInitializedEvent"
+        handler="agsci.subsite.events.onSectionCreation" 
+        />
+
+    <!-- Register an event handler for when a Blog is created -->
+    <subscriber for="agsci.subsite.content.interfaces.IBlog
+        Products.Archetypes.interfaces.IObjectInitializedEvent"
+        handler="agsci.subsite.events.onBlogCreation" 
+        />
+
+    <!-- Register an event handler for when a Newsletter is created -->
+    <subscriber for="agsci.subsite.content.interfaces.INewsletter
+        Products.Archetypes.interfaces.IObjectInitializedEvent"
+        handler="agsci.subsite.events.onNewsletterCreation" 
+        />
+
+    <!-- register the Generic Setup extension profile -->
+    <genericsetup:registerProfile
+        name="default"
+        title="agsci.subsite"
+        directory="profiles/default"
+        description="Extension profile for agsci.subsite"
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        />
+
+    <!-- Permissions -->
+    <permission
+        id="agsci.subsite.EditSubsite"
+        title="agsci.subsite: Edit Subsite"
+        />
+
+    <permission
+        id="agsci.subsite.EditCountySite"
+        title="agsci.subsite: Edit CountySite"
+        />
+        
+    <permission
+        id="agsci.subsite.EditSection"
+        title="agsci.subsite: Edit Section"
+        />
+        
+    <permission
+        id="agsci.subsite.EditBlog"
+        title="agsci.subsite: Edit Blog"
+        />
+        
+    <permission
+        id="agsci.subsite.EditHomePage"
+        title="agsci.subsite: Edit HomePage"
+        />
+
+    <permission
+        id="agsci.subsite.EditNewsletter"
+        title="agsci.subsite: Edit Newsletter"
+        />
+        
+    <permission
+        id="agsci.subsite.EditPhotoFolder"
+        title="agsci.subsite: Edit PhotoFolder"
+        />
+
+</configure>
