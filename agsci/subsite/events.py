@@ -2,7 +2,11 @@ from Products.CMFCore.utils import getToolByName
 
 from zope.component import getUtility
 from zope.component import getMultiAdapter
-from zope.app.container.interfaces import INameChooser
+
+try:
+    from zope.app.container.interfaces import INameChooser
+except ImportError:
+    from zope.container.interfaces import INameChooser
 
 from plone.portlets.interfaces import IPortletManager, IPortletAssignmentMapping, ILocalPortletAssignmentManager
 

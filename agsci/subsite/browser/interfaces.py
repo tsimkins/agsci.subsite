@@ -1,5 +1,5 @@
-from plonetheme.classic.browser.interfaces import IThemeSpecific as IClassicTheme
+from plonetheme.sunburst.browser.interfaces import IThemeSpecific as ISunburstTheme
 
-class IThemeSpecific(IClassicTheme):
+class IThemeSpecific(ISunburstTheme):
     """Marker interface"""
 
