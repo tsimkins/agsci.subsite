@@ -157,7 +157,7 @@ class Newsletter(ATTopic):
 
         # Fix sort_order if not reversed (e.g. blank) on this item
         sc = self.getSortCriterion()
-        if sc and not sc.getReversed():
+        if sc and not sc.getReversed() and result.has_key('sort_order'):
             del result['sort_order']
 
         return result
