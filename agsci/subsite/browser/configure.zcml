@@ -12,7 +12,7 @@
         class=".viewlets.TagsViewlet"
         permission="zope2.View"
         layer="Products.agCommon.browser.interfaces.IThemeSpecific"
-        for="Products.ATContentTypes.interfaces.news.IATNewsItem"
+        for="agsci.UniversalExtender.interfaces.ITagExtender"
         />
 
     <browser:page
