@@ -1,16 +1,14 @@
 <div class="documentByLine public-tags"
-     tal:define="categories context/public_tags|nothing;
-                 url_quote  nocall:modules/Products.PythonScripts.standard/url_quote;"
-     tal:condition="categories">
+     tal:define="tag_data view/tag_data|nothing;"
+     tal:condition="tag_data">
   <tal:filedunder i18n:translate="label_filed_under">Tags<span tal:condition="not:view/anonymous"> (public)</span>:</tal:filedunder>
-  <span tal:repeat="category categories">
+  <span tal:repeat="item tag_data">
     <a href=""
        class="link-category"
        rel="tag"
-       tal:content="category"
-       tal:define="quotedCat python:url_quote(category)"
-       tal:attributes="href string:${context/portal_url}/search?portal_type:list=News%20Item&Tags%3Alist=${quotedCat}">
+       tal:content="python: item[0]"
+       tal:attributes="href python: item[1]">
       Category
-      </a><span class="separator" tal:condition="not: repeat/category/end">,</span>
+      </a><span class="separator" tal:condition="not: repeat/item/end">,</span>
   </span>
 </div>

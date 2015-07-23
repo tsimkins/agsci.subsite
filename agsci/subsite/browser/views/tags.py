@@ -8,6 +8,7 @@ from zope.component import getUtility
 from plone.i18n.normalizer.interfaces import IIDNormalizer
 from Products.CMFPlone.interfaces import IPloneSiteRoot
 from Acquisition import aq_chain, aq_acquire
+from agsci.subsite import utilities 
 
 class ITagsView(Interface):
     """
@@ -99,15 +100,7 @@ class TagsView(AgendaView):
 
     @property
     def tag_root(self):
-
-        for i in aq_chain(self.context):
-            if IPloneSiteRoot.providedBy(i):
-                return i
-            if ITagRoot.providedBy(i):
-                return i
-
-        # Probably not needed, but just so we return something.
-        return self.context
+        return utilities.getTagRoot(self.context)
         
     @property
     def available_tags(self):

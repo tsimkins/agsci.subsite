@@ -21,6 +21,8 @@ from agsci.subsite.content.interfaces import ITagRoot
 from zope.component import getUtility
 from plone.i18n.normalizer.interfaces import IIDNormalizer
 
+from agsci.subsite import utilities
+
 class ITag(IPortletDataProvider):
 
     header = schema.TextLine(
@@ -121,14 +123,7 @@ class Renderer(base.Renderer):
     @property
     def tag_root(self):
 
-        for i in aq_chain(self.context):
-            if IPloneSiteRoot.providedBy(i):
-                return i
-            if ITagRoot.providedBy(i):
-                return i
-
-        # Probably not needed, but just so we return something.
-        return context
+        return utilities.getTagRoot(self.context)
 
     @property
     def tags(self):
@@ -146,18 +141,14 @@ class Renderer(base.Renderer):
             items = self.portal_catalog.searchResults({self.catalog_index : available_tags, 'path' : path})                
 
         for i in items:
-            if hasattr(i, self.obj_tags):
-                obj_tags = getattr(i, self.obj_tags)
-
-                if not obj_tags:
-                    obj_tags = []
-                    
-                for t in obj_tags:
-                    if available_tags:
-                        if t in available_tags:
-                            tags[t] = 1
-                    else:
+            obj_tags = getattr(i, self.obj_tags, [])
+                
+            for t in obj_tags:
+                if available_tags:
+                    if t in available_tags:
                         tags[t] = 1
+                else:
+                    tags[t] = 1
        
         for t in sorted(tags.keys()):
             normalized_tags.append([normalizer.normalize(t), t])    
