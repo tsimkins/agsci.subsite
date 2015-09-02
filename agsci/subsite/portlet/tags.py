@@ -142,7 +142,10 @@ class Renderer(base.Renderer):
 
         for i in items:
             obj_tags = getattr(i, self.obj_tags, [])
-                
+
+            if not obj_tags:
+                continue
+
             for t in obj_tags:
                 if available_tags:
                     if t in available_tags:
