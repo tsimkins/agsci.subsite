@@ -1,7 +1,7 @@
 from zope.interface import implements, Interface
 from Products.Five import BrowserView
 from Products.CMFCore.utils import getToolByName
-from Products.agCommon.browser.views import FolderView, AgendaView
+from Products.agCommon.browser.views import FolderView, AgendaView, RSSFeedView
 from agsci.subsite.content.interfaces import ITagRoot
 from plone.memoize.view import memoize
 from zope.component import getUtility
@@ -18,7 +18,7 @@ class ITagsView(Interface):
     def test():
         """ test method"""
 
-class TagsView(AgendaView):
+class TagsView(RSSFeedView):
 
     implements(ITagsView)
 
@@ -144,8 +144,7 @@ class TagsView(AgendaView):
             if default_page in tag_root.objectIds() and tag_root[default_page].portal_type == 'Topic':
                 return tag_root[default_page].queryCatalog(**{self.catalog_index : tags})
 
-            return []
-        elif tags:
+        if tags:
             return self.portal_catalog.searchResults({self.catalog_index : tags, 'path' : '/'.join(tag_root.getPhysicalPath())})
         else:
             return []
