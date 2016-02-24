@@ -18,7 +18,7 @@ class ITagsView(Interface):
     def test():
         """ test method"""
 
-class TagsView(RSSFeedView):
+class TagsView(RSSFeedView, AgendaView):
 
     implements(ITagsView)
 
