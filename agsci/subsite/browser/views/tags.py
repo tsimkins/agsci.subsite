@@ -135,17 +135,22 @@ class TagsView(RSSFeedView, AgendaView):
 
         return item_tags
 
-    def getFolderContents(self):
+    def getFolderContents(self, contentFilter={}):
         tag_root = self.tag_root
         tags = self.tags
 
+        contentFilter[self.catalog_index] = tags
+
         if ITagRoot.providedBy(tag_root):
+        
             default_page = tag_root.getDefaultPage()
             if default_page in tag_root.objectIds() and tag_root[default_page].portal_type == 'Topic':
-                return tag_root[default_page].queryCatalog(**{self.catalog_index : tags})
+                return tag_root[default_page].queryCatalog(**contentFilter)
 
         if tags:
-            return self.portal_catalog.searchResults({self.catalog_index : tags, 'path' : '/'.join(tag_root.getPhysicalPath())})
+            contentFilter['path'] = '/'.join(tag_root.getPhysicalPath())
+        
+            return self.portal_catalog.searchResults(contentFilter)
         else:
             return []
 
