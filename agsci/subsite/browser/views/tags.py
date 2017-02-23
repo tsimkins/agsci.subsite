@@ -145,12 +145,12 @@ class TagsView(RSSFeedView, AgendaView):
         
             default_page = tag_root.getDefaultPage()
             if default_page in tag_root.objectIds() and tag_root[default_page].portal_type == 'Topic':
-                return tag_root[default_page].queryCatalog(**contentFilter)
+                return list(tag_root[default_page].queryCatalog(**contentFilter))
 
         if tags:
             contentFilter['path'] = '/'.join(tag_root.getPhysicalPath())
         
-            return self.portal_catalog.searchResults(contentFilter)
+            return list(self.portal_catalog.searchResults(contentFilter))
         else:
             return []
 
