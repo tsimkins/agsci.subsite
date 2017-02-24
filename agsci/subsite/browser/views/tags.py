@@ -8,7 +8,9 @@ from zope.component import getUtility
 from plone.i18n.normalizer.interfaces import IIDNormalizer
 from Products.CMFPlone.interfaces import IPloneSiteRoot
 from Acquisition import aq_chain, aq_acquire
-from agsci.subsite import utilities 
+from agsci.subsite import utilities
+from zLOG import LOG, INFO
+import pprint
 
 class ITagsView(Interface):
     """
@@ -26,7 +28,7 @@ class TagsView(RSSFeedView, AgendaView):
         self.context = context
         self.request = request
         self.url_tags = []
-        
+
         # Overrite configuration
         self.singular_title = 'Tag'
         self.plural_title = 'Tags'
@@ -51,9 +53,9 @@ class TagsView(RSSFeedView, AgendaView):
             title = self.plural_title
         else:
             title = self.singular_title
-            
+
         return '%s (%s: %s)' % (self.context_state.object_title(), title, ', '.join(tags))
-    
+
     def publishTraverse(self, request, name):
 
         if name:
@@ -66,7 +68,7 @@ class TagsView(RSSFeedView, AgendaView):
 
         self.original_url = request.getURL()
         self.original_context = self.context
-        
+
         self.context = self.tag_root
 
         return self
@@ -80,10 +82,10 @@ class TagsView(RSSFeedView, AgendaView):
                 obj = self.original_context[default_page]
         except:
             pass
-            
+
         if not obj:
             obj = self.original_context
-        
+
         return obj
 
     @property
@@ -101,29 +103,26 @@ class TagsView(RSSFeedView, AgendaView):
     @property
     def tag_root(self):
         return utilities.getTagRoot(self.context)
-        
+
     @property
     def available_tags(self):
 
         available_tags = []
 
         tag_root = self.tag_root
-        
+
         if hasattr(tag_root, self.tag_listing):
-            available_tags = getattr(tag_root, self.tag_listing)        
+            return getattr(tag_root, self.tag_listing, [])
 
-        if not available_tags:
-            available_tags = self.portal_catalog.uniqueValuesFor(self.catalog_index)
-        
-        return available_tags
-
+        else:
+            return self.portal_catalog.uniqueValuesFor(self.catalog_index)
 
     @property
     def tags(self):
 
         # Get the intersection of the tags provided in the URL and the tags
         # available to be used.
-        
+
         available_tags = self.available_tags
         normalized_available_tags = [self.normalizer.normalize(x) for x in available_tags]
 
@@ -139,20 +138,42 @@ class TagsView(RSSFeedView, AgendaView):
         tag_root = self.tag_root
         tags = self.tags
 
-        contentFilter[self.catalog_index] = tags
-
-        if ITagRoot.providedBy(tag_root):
-        
-            default_page = tag_root.getDefaultPage()
-            if default_page in tag_root.objectIds() and tag_root[default_page].portal_type == 'Topic':
-                query = tag_root[default_page].buildQuery()
-                query.update(contentFilter)
-                return self.portal_catalog.searchResults(query)
-
         if tags:
-            contentFilter['path'] = '/'.join(tag_root.getPhysicalPath())
-        
-            return self.portal_catalog.searchResults(contentFilter)
+
+            contentFilter[self.catalog_index] = tags
+
+            if ITagRoot.providedBy(tag_root):
+
+                default_page = tag_root.getDefaultPage()
+
+                if default_page in tag_root.objectIds() and tag_root[default_page].portal_type == 'Topic':
+                    query = tag_root[default_page].buildQuery()
+                    query.update(contentFilter)
+                    contentFilter = query
+
+                else:
+                    contentFilter['path'] = '/'.join(tag_root.getPhysicalPath())
+
+            results = list(self.portal_catalog.searchResults(contentFilter))
+
+            pp = pprint.PrettyPrinter(indent=4)
+
+            msg = """
+====================================================================
+Query:
+
+%s
+
+Result Count: %d
+
+uids = %s
+====================================================================
+            """ % (pp.pformat(contentFilter), len(results), repr([x.UID for x in results]))
+
+            LOG('Tag View Query (%d)' % len(results), INFO, self.request.getURL(), msg )
+
+            return results
+
         else:
             return []
 
@@ -162,7 +183,7 @@ class TagsView(RSSFeedView, AgendaView):
             show_date = aq_acquire(self.getSettingsObject(), 'show_date')
         except AttributeError:
             show_date = False
-        
+
         return show_date
 
     @property
@@ -171,7 +192,7 @@ class TagsView(RSSFeedView, AgendaView):
             show_image = aq_acquire(self.getSettingsObject(), 'show_image')
         except AttributeError:
             show_image = False
-        
+
         return show_image
 
     @property
@@ -180,5 +201,5 @@ class TagsView(RSSFeedView, AgendaView):
             show_read_more = aq_acquire(self.getSettingsObject(), 'show_read_more')
         except AttributeError:
             show_read_more = False
-        
+
         return show_read_more
