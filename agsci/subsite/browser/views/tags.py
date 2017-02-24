@@ -24,6 +24,8 @@ class TagsView(RSSFeedView, AgendaView):
 
     implements(ITagsView)
 
+    debug = False
+
     def __init__(self, context, request):
         self.context = context
         self.request = request
@@ -138,9 +140,13 @@ class TagsView(RSSFeedView, AgendaView):
         tag_root = self.tag_root
         tags = self.tags
 
-        if tags:
+        # Ignoring contentFilter.  For some reason, this was coming in with
+        # values from another request, and causing the tags to be blank.
+        #
+        # Creating another value of `query` to the the same calculations
+        query = {}
 
-            contentFilter[self.catalog_index] = tags
+        if tags:
 
             if ITagRoot.providedBy(tag_root):
 
@@ -148,29 +154,30 @@ class TagsView(RSSFeedView, AgendaView):
 
                 if default_page in tag_root.objectIds() and tag_root[default_page].portal_type == 'Topic':
                     query = tag_root[default_page].buildQuery()
-                    query.update(contentFilter)
-                    contentFilter = query
 
                 else:
-                    contentFilter['path'] = '/'.join(tag_root.getPhysicalPath())
+                    query['path'] = '/'.join(tag_root.getPhysicalPath())
 
-            results = list(self.portal_catalog.searchResults(contentFilter))
+            query[self.catalog_index] = tags
 
-            pp = pprint.PrettyPrinter(indent=4)
+            results = list(self.portal_catalog.searchResults(query))
 
-            msg = """
-====================================================================
-Query:
+            if self.debug:
+                pp = pprint.PrettyPrinter(indent=4)
 
-%s
+                msg = """
+    ====================================================================
+    Query:
 
-Result Count: %d
+    %s
 
-uids = %s
-====================================================================
-            """ % (pp.pformat(contentFilter), len(results), repr([x.UID for x in results]))
+    Result Count: %d
 
-            LOG('Tag View Query (%d)' % len(results), INFO, self.request.getURL(), msg )
+    uids = %s
+    ====================================================================
+                """ % (pp.pformat(query), len(results), repr([x.UID for x in results]))
+
+                LOG('Tag View Query (%d)' % len(results), INFO, self.request.getURL(), msg )
 
             return results
 
